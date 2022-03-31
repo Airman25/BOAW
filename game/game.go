@@ -3,6 +3,7 @@ package game
 import (
 	"log"
 
+	"github.com/Airman25/BOAW/manager"
 	"github.com/Airman25/BOAW/rooms"
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -13,13 +14,19 @@ type Game struct {
 }
 
 var ObjectsArr []rooms.RoomObject
+var mouseReleased bool
 
-func Launch(screenWidth, screenHeight int) {
+var screenWidth, screenHeight int
+
+func Launch(screenWidthHere, screenHeightHere int) {
+	screenWidth = screenWidthHere
+	screenHeight = screenHeightHere
 	game := &Game{}
 	ebiten.SetWindowSize(screenWidth, screenHeight)
 	//To Do: add game icon
 	//ebiten.SetWindowIcon(iconimage)
-	ObjectsArr = rooms.Rooms(0, screenWidth, screenHeight)
+
+	ObjectsArr = manager.RoomsManager(0, screenWidth, screenHeight)
 	if err := ebiten.RunGame(game); err != nil {
 		log.Fatal(err)
 	}
@@ -35,6 +42,7 @@ func (g *Game) Update() error { // Game's logical update. Update proceeds the ga
 
 func (g *Game) Draw(screen *ebiten.Image) { // Game's rendering.
 	renderObjects(screen)
+	makeButtons()
 }
 
 func renderObjects(screen *ebiten.Image) { //renders all of the objects in a room
@@ -44,4 +52,33 @@ func renderObjects(screen *ebiten.Image) { //renders all of the objects in a roo
 		op.GeoM.Translate(ObjectsArr[i].X, ObjectsArr[i].Y)
 		screen.DrawImage(ObjectsArr[i].Image, op)
 	}
+}
+
+func makeButtons() {
+	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) &&
+		mouseReleased {
+		mx, my := ebiten.CursorPosition()
+		mouseReleased = false
+		changeroom := manager.ButtonFunction(pressButton(mx, my))
+		if changeroom != 0 {
+			ObjectsArr = manager.RoomsManager(changeroom, screenWidth, screenHeight)
+		}
+	} else if !ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
+		mouseReleased = true
+	}
+}
+
+func pressButton(mx, my int) int {
+	for i := 0; i < len(ObjectsArr); i++ {
+		if ObjectsArr[i].Function > 0 {
+			x := int(ObjectsArr[i].X)
+			y := int(ObjectsArr[i].Y)
+			if mx > x && mx < x+ObjectsArr[i].W && my > y && my < y+ObjectsArr[i].H {
+				return ObjectsArr[i].Function
+			}
+		} else {
+			return 0
+		}
+	}
+	return 0
 }
