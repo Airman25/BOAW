@@ -19,7 +19,7 @@ func Launch(screenWidth, screenHeight int) {
 	ebiten.SetWindowSize(screenWidth, screenHeight)
 	//To Do: add game icon
 	//ebiten.SetWindowIcon(iconimage)
-	ObjectsArr = rooms.Rooms(0)
+	ObjectsArr = rooms.Rooms(0, screenWidth, screenHeight)
 	if err := ebiten.RunGame(game); err != nil {
 		log.Fatal(err)
 	}
@@ -40,7 +40,8 @@ func (g *Game) Draw(screen *ebiten.Image) { // Game's rendering.
 func renderObjects(screen *ebiten.Image) { //renders all of the objects in a room
 	for i := 0; i < len(ObjectsArr); i++ {
 		op := &ebiten.DrawImageOptions{}
-		op.GeoM.Translate(float64(ObjectsArr[i].X), float64(ObjectsArr[i].Y))
+		op.GeoM.Scale(ObjectsArr[i].Scale, ObjectsArr[i].Scale)
+		op.GeoM.Translate(ObjectsArr[i].X, ObjectsArr[i].Y)
 		screen.DrawImage(ObjectsArr[i].Image, op)
 	}
 }
