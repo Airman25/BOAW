@@ -1,9 +1,12 @@
 package load
 
 import (
+	"bufio"
 	"image"
 	_ "image/png"
 	"log"
+	"os"
+	"strings"
 
 	"github.com/fogleman/gg"
 	"github.com/hajimehoshi/ebiten/v2"
@@ -40,13 +43,15 @@ func ImageText(filename, text string, width, height int, font string, fs float64
 	return ebiten.NewImageFromImage(imageSetText(ImageNormal(filename), text, width, height, font, fs, color))
 }
 
+var DefaultFontSize = 24.0
+
 //simply adds text to image
 func imageSetText(img image.Image, textonimage string, width int, height int, font string, fs float64, color int) image.Image {
 	if font == "" { //default case for font and fontsize
 		font = "arial"
 	}
 	if fs == 0 {
-		fs = 24
+		fs = DefaultFontSize
 	}
 	dc := gg.NewContext(width, height)
 	if err := dc.LoadFontFace(`src\fonts\`+font+".ttf", fs); err != nil {
@@ -63,4 +68,22 @@ func imageSetText(img image.Image, textonimage string, width int, height int, fo
 	dc.DrawStringAnchored(textonimage, float64(width)/2, float64(height)/2, 0.5, 0.5)
 	dc.Clip()
 	return dc.Image()
+}
+
+var Localisation = make(map[string]string, 9)
+
+//changes all objects name
+func LoadLang(filename string) {
+	fin, err := os.Open(`src\lang\` + filename)
+	if err != nil {
+		panic(err)
+	}
+	scanner := bufio.NewScanner(fin)
+	for scanner.Scan() {
+		s := scanner.Text()
+		if !strings.HasPrefix(s, "//") {
+			Localisation[strings.Split(s, "=")[0]] = strings.Split(s, "=")[1]
+		}
+	}
+	fin.Close()
 }

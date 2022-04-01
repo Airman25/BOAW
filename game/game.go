@@ -25,7 +25,7 @@ func Launch(screenWidthHere, screenHeightHere int) {
 	ebiten.SetWindowSize(screenWidth, screenHeight)
 	//To Do: add game icon
 	//ebiten.SetWindowIcon(iconimage)
-
+	manager.LangManager()
 	ObjectsArr = manager.RoomsManager(0, screenWidth, screenHeight)
 	if err := ebiten.RunGame(game); err != nil {
 		log.Fatal(err)
