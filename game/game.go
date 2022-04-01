@@ -42,7 +42,7 @@ func (g *Game) Update() error { // Game's logical update. Update proceeds the ga
 
 func (g *Game) Draw(screen *ebiten.Image) { // Game's rendering.
 	renderObjects(screen)
-	makeButtons()
+	buttonsClickDetect()
 }
 
 func renderObjects(screen *ebiten.Image) { //renders all of the objects in a room
@@ -54,13 +54,14 @@ func renderObjects(screen *ebiten.Image) { //renders all of the objects in a roo
 	}
 }
 
-func makeButtons() {
+//detects mouse button press event
+func buttonsClickDetect() {
 	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) &&
 		mouseReleased {
 		mx, my := ebiten.CursorPosition()
 		mouseReleased = false
-		changeroom := manager.ButtonFunction(pressButton(mx, my))
-		if changeroom != 0 {
+		changeroom := manager.ButtonFunction(buttonPressed(mx, my))
+		if changeroom != -1 {
 			ObjectsArr = manager.RoomsManager(changeroom, screenWidth, screenHeight)
 		}
 	} else if !ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
@@ -68,17 +69,17 @@ func makeButtons() {
 	}
 }
 
-func pressButton(mx, my int) int {
+//check the coordinates to know whcih button was clicked
+func buttonPressed(mx, my int) int {
 	for i := 0; i < len(ObjectsArr); i++ {
-		if ObjectsArr[i].Function > 0 {
-			x := int(ObjectsArr[i].X)
-			y := int(ObjectsArr[i].Y)
-			if mx > x && mx < x+ObjectsArr[i].W && my > y && my < y+ObjectsArr[i].H {
-				return ObjectsArr[i].Function
-			}
-		} else {
-			return 0
+		if ObjectsArr[i].Function == -1 { //all non button object will have -1 as function
+			return -1
+		}
+		x := int(ObjectsArr[i].X)
+		y := int(ObjectsArr[i].Y)
+		if mx > x && mx < x+ObjectsArr[i].W && my > y && my < y+ObjectsArr[i].H {
+			return ObjectsArr[i].Function
 		}
 	}
-	return 0
+	return -1
 }

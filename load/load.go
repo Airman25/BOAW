@@ -26,6 +26,7 @@ func ImageNormal(filename string) image.Image { //Images that might be used for 
 	return imageNormal
 }
 
+//gets the image from src folder
 func imageGet(filename string) (*ebiten.Image, image.Image) {
 	ebitenImg, img, err := ebitenutil.NewImageFromFile(`src\textures\` + filename + ".png")
 	if err != nil {
@@ -39,6 +40,7 @@ func ImageText(filename, text string, width, height int, font string, fs float64
 	return ebiten.NewImageFromImage(imageSetText(ImageNormal(filename), text, width, height, font, fs, color))
 }
 
+//simply adds text to image
 func imageSetText(img image.Image, textonimage string, width int, height int, font string, fs float64, color int) image.Image {
 	if font == "" { //default case for font and fontsize
 		font = "arial"
