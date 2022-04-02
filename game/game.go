@@ -8,10 +8,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-type Game struct {
-	gameRoom int
-	player   *ebiten.Image
-}
+type Game struct{}
 
 var ObjectsArr []rooms.RoomObject
 var mouseReleased bool

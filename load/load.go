@@ -24,7 +24,7 @@ func ImageEbiten(filename string) *ebiten.Image { //Images for ebiten to render
 	return imageEbiten
 }
 
-func ImageNormal(filename string) image.Image { //Images that might be used for other purposes (for example to write text on them before rendering)
+func imageNormal(filename string) image.Image { //Images that might be used for other purposes (for example to write text on them before rendering)
 	_, imageNormal := imageGet(filename)
 	return imageNormal
 }
@@ -40,7 +40,10 @@ func imageGet(filename string) (*ebiten.Image, image.Image) {
 }
 
 func ImageText(filename, text string, width, height int, font string, fs float64, color int) *ebiten.Image {
-	return ebiten.NewImageFromImage(imageSetText(ImageNormal(filename), text, width, height, font, fs, color))
+	if filename != "" {
+		return ebiten.NewImageFromImage(imageSetText(imageNormal(filename), text, width, height, font, fs, color))
+	}
+	return ebiten.NewImageFromImage(imageSetText(nil, text, width, height, font, fs, color))
 }
 
 var DefaultFontSize = 24.0
@@ -60,10 +63,14 @@ func imageSetText(img image.Image, textonimage string, width int, height int, fo
 	if img != nil {
 		dc.DrawImage(img, 0, 0)
 	}
-	if color == 0 { // 0 = black, 1 = white
+	if color == 0 { // 0 = black, 1 = white, 2 = yellow, 3 = blue
 		dc.SetRGB(0, 0, 0)
-	} else {
+	} else if color == 1 {
 		dc.SetRGB(1, 1, 1)
+	} else if color == 2 {
+		dc.SetRGB(246.0/256.0, 246.0/256.0, 78.0/256.0)
+	} else if color == 3 {
+		dc.SetRGB(45.0/256.0, 119.0/256.0, 219.0/256.0)
 	}
 	dc.DrawStringAnchored(textonimage, float64(width)/2, float64(height)/2, 0.5, 0.5)
 	dc.Clip()
@@ -72,7 +79,7 @@ func imageSetText(img image.Image, textonimage string, width int, height int, fo
 
 var Localisation = make(map[string]string, 9)
 
-//changes all objects name
+//changes all objects names
 func LoadLang(filename string) {
 	fin, err := os.Open(`src\lang\` + filename)
 	if err != nil {
@@ -87,3 +94,7 @@ func LoadLang(filename string) {
 	}
 	fin.Close()
 }
+
+var Difficulty int
+var MusicVolume int
+var GameSpeed = 1
