@@ -11,26 +11,28 @@ import (
 type Game struct{}
 
 var ObjectsArr []rooms.RoomObject
+var Background []*ebiten.Image
 var mouseReleased bool
+var animated = 0
 
-var screenWidth, screenHeight int
+const screenWidth = 1280
+const screenHeight = 720
 
-func Launch(screenWidthHere, screenHeightHere int) {
-	screenWidth = screenWidthHere
-	screenHeight = screenHeightHere
+func Launch(screenSizeWidth, screenSizeHeight int) {
 	game := &Game{}
-	ebiten.SetWindowSize(screenWidth, screenHeight)
+	ebiten.SetWindowSize(screenSizeWidth, screenSizeHeight)
 	//To Do: add game icon
 	//ebiten.SetWindowIcon(iconimage)
-	manager.LangManager()
+	manager.LangManager(201)
 	ObjectsArr = manager.RoomsManager(0, screenWidth, screenHeight)
+	Background = rooms.DefaultBackground()
 	if err := ebiten.RunGame(game); err != nil {
 		log.Fatal(err)
 	}
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) { // Layout takes the outside size (e.g., the window size) and returns the (logical) screen size. If you don't have to adjust the screen size with the outside size, just return a fixed size.
-	return outsideWidth, outsideHeight
+	return 1280, 720
 }
 
 func (g *Game) Update() error { // Game's logical update. Update proceeds the game state. Update is called every tick (1/60 [s] by default).
@@ -38,8 +40,27 @@ func (g *Game) Update() error { // Game's logical update. Update proceeds the ga
 }
 
 func (g *Game) Draw(screen *ebiten.Image) { // Game's rendering.
+	//renderBackground(screen)
 	renderObjects(screen)
 	buttonsClickDetect()
+}
+
+//ToDo draw the actual background
+func renderBackground(screen *ebiten.Image) {
+	animated++
+	op := &ebiten.DrawImageOptions{}
+	if animated < 12 {
+		screen.DrawImage(Background[0], op)
+	} else if animated < 24 {
+		screen.DrawImage(Background[1], op)
+	} else {
+		screen.DrawImage(Background[0], op)
+		animated = 0
+	}
+
+	//op.GeoM.Scale(ObjectsArr[i].Scale, ObjectsArr[i].Scale)
+	//op.GeoM.Translate(ObjectsArr[i].X, ObjectsArr[i].Y)
+
 }
 
 func renderObjects(screen *ebiten.Image) { //renders all of the objects in a room

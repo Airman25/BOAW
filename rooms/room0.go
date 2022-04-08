@@ -34,3 +34,7 @@ func GetRoom0(screenWidth, screenHeight int) []RoomObject {
 		{float64(screenWidth)/2 - buttonwidth, float64(screenHeight)/2 - buttonheight*4 + buttonheight/2, 0, 0, buttonscaling, -1, load.ImageText("", load.Localisation["descBOAW"], buttonwidth*2, buttonheight*2, "", 36, 2)},
 	}
 }
+
+func DefaultBackground() []*ebiten.Image {
+	return []*ebiten.Image{} //load.ImageEbiten("Back0"), load.ImageEbiten("Back1")
+}

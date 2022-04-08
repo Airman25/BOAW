@@ -5,8 +5,6 @@ import (
 )
 
 func main() { //github.com/Airman25/BOAW
-	//I might change the size of the window in the future but for now it will be 1280x720
-	var Width = 1280 //1920 1280
-	var Height = 720 //1080 720
-	game.Launch(Width, Height)
+	//Added posibility to change screen size in the game, but default is 1280x720
+	game.Launch(1280, 720)
 }

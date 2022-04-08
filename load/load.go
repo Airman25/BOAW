@@ -6,6 +6,7 @@ import (
 	_ "image/png"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/fogleman/gg"
@@ -77,7 +78,7 @@ func imageSetText(img image.Image, textonimage string, width int, height int, fo
 	return dc.Image()
 }
 
-var Localisation = make(map[string]string, 9)
+var Localisation = make(map[string]string, 18)
 
 //changes all objects names
 func LoadLang(filename string) {
@@ -98,3 +99,9 @@ func LoadLang(filename string) {
 var Difficulty int
 var MusicVolume int
 var GameSpeed = 1
+var GameSize = "1280x720"
+
+func SizeChanger(screenSizeWidth, screenSizeHeight int) {
+	ebiten.SetWindowSize(screenSizeWidth, screenSizeHeight)
+	GameSize = strconv.Itoa(screenSizeWidth) + "x" + strconv.Itoa(screenSizeHeight)
+}

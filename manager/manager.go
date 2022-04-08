@@ -1,12 +1,12 @@
 package manager
 
 import (
-	"io/ioutil"
 	"os"
 	"os/exec"
 
 	"github.com/Airman25/BOAW/load"
 	"github.com/Airman25/BOAW/rooms"
+	"github.com/hajimehoshi/ebiten/v2"
 )
 
 //redirect you to the room you need
@@ -25,49 +25,41 @@ func RoomsManager(room, screenWidth, screenHeight int) []rooms.RoomObject {
 	case 5:
 		return rooms.GetRoom5(screenWidth, screenHeight) //just credits
 	case 6:
-		return rooms.GetRoom5(screenWidth, screenHeight) //will be actual game at some point
+		return rooms.GetRoom6(screenWidth, screenHeight) //will be actual game at some point
 	default:
 		return nil
 	}
 }
 
-var currentLanguage int
-
 //Reads file from src/lang
-func LangManager() {
-	files, err := ioutil.ReadDir("src/lang")
-	if err != nil {
-		panic(err)
-	}
-	if currentLanguage < len(files) {
-		load.LoadLang(files[currentLanguage].Name())
-		currentLanguage++
+func LangManager(lang int) {
+	if lang == 201 {
+		load.LoadLang("en_us.lang")
 	} else {
-		load.LoadLang(files[0].Name())
-		currentLanguage = 1
+		load.LoadLang("ru_ru.lang")
 	}
+
 }
 
 //in most cases change game "room" to the one requested by the button
 func ButtonFunction(function int) int {
+	if function > 200 {
+		LangManager(function)
+		return 3
+	}
 	switch function {
 	case 100:
 		os.Exit(0)
 	case 101:
-		LangManager()
-		return 3
+		return -1
 	case 102:
-		if load.DefaultFontSize < 30 {
-			load.DefaultFontSize++
-		} else {
-			load.DefaultFontSize = 10
+		if load.MusicVolume > 0 {
+			load.MusicVolume -= 10
 		}
 		return 3
 	case 103:
 		if load.MusicVolume < 100 {
 			load.MusicVolume += 10
-		} else {
-			load.MusicVolume = 0
 		}
 		return 3
 	case 104:
@@ -96,6 +88,30 @@ func ButtonFunction(function int) int {
 	case 109:
 
 		return -1
+	case 110:
+
+		fh, fw := ebiten.ScreenSizeInFullscreen()
+		h, _ := ebiten.WindowSize()
+
+		switch h {
+		case 1024:
+			load.SizeChanger(1152, 648)
+		case 1152:
+			load.SizeChanger(1280, 720)
+		case 1280:
+			load.SizeChanger(1366, 768)
+		case 1366:
+			load.SizeChanger(1600, 900)
+		case 1600:
+			load.SizeChanger(1920, 1080)
+		case 1920:
+			load.SizeChanger(fh, fw)
+			ebiten.SetFullscreen(true)
+		case fh:
+			ebiten.SetFullscreen(false)
+			load.SizeChanger(1024, 648)
+		}
+		return 3
 	}
 	return function
 }
