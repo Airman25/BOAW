@@ -7,6 +7,7 @@ import (
 	"github.com/Airman25/BOAW/load"
 	"github.com/Airman25/BOAW/rooms"
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/audio"
 )
 
 //redirect you to the room you need
@@ -56,11 +57,13 @@ func ButtonFunction(function int) int {
 		if load.MusicVolume > 0 {
 			load.MusicVolume -= 10
 		}
+		PlayMusic("ping-pong")
 		return 3
 	case 103:
 		if load.MusicVolume < 100 {
 			load.MusicVolume += 10
 		}
+		PlayMusic("ping-pong")
 		return 3
 	case 104:
 		if load.Difficulty < 4 {
@@ -124,4 +127,18 @@ func OpenUrl(url []string) {
 			panic(err)
 		}
 	}
+}
+
+var audioPlayer *audio.Player
+
+func PlayMusic(filename string) {
+	if audioPlayer != nil {
+		audioPlayer.Close()
+	}
+	if load.MusicVolume == 0 {
+		return
+	}
+	audioPlayer = load.GetMusic(filename)
+	audioPlayer.SetVolume(float64(load.MusicVolume) / 100)
+	audioPlayer.Play()
 }

@@ -2,7 +2,7 @@ package rooms
 
 import "github.com/Airman25/BOAW/load"
 
-//ToDo: maybe make the actual game?...still no?
+//ToDo: maybe make the actual game?...still no?...when???
 
 //will be actual game at some point
 func GetRoom6(screenWidth, screenHeight int) []RoomObject {

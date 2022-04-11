@@ -2,6 +2,7 @@ package load
 
 import (
 	"bufio"
+	"fmt"
 	"image"
 	_ "image/png"
 	"log"
@@ -11,6 +12,8 @@ import (
 
 	"github.com/fogleman/gg"
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/audio"
+	"github.com/hajimehoshi/ebiten/v2/audio/mp3"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
@@ -104,4 +107,25 @@ var GameSize = "1280x720"
 func SizeChanger(screenSizeWidth, screenSizeHeight int) {
 	ebiten.SetWindowSize(screenSizeWidth, screenSizeHeight)
 	GameSize = strconv.Itoa(screenSizeWidth) + "x" + strconv.Itoa(screenSizeHeight)
+}
+
+var AudioContext *audio.Context
+
+func GetMusic(filename string) *audio.Player {
+	f, err := ebitenutil.OpenFile(`src\audio\` + filename + ".mp3")
+	if err != nil {
+		fmt.Print(err.Error())
+		return nil
+	}
+	d, err := mp3.Decode(AudioContext, f)
+	if err != nil {
+		fmt.Print(err.Error())
+		return nil
+	}
+	audioPlay, err := audio.NewPlayer(AudioContext, d)
+	if err != nil {
+		fmt.Print(err.Error())
+		return nil
+	}
+	return audioPlay
 }

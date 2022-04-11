@@ -3,9 +3,11 @@ package game
 import (
 	"log"
 
+	"github.com/Airman25/BOAW/load"
 	"github.com/Airman25/BOAW/manager"
 	"github.com/Airman25/BOAW/rooms"
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/audio"
 )
 
 type Game struct{}
@@ -18,12 +20,16 @@ var animated = 0
 const screenWidth = 1280
 const screenHeight = 720
 
-func Launch(screenSizeWidth, screenSizeHeight int) {
+func Launch(screenSizeWidth, screenSizeHeight int, musicenabled bool) {
 	game := &Game{}
 	ebiten.SetWindowSize(screenSizeWidth, screenSizeHeight)
 	//To Do: add game icon
 	//ebiten.SetWindowIcon(iconimage)
 	manager.LangManager(201)
+	if musicenabled {
+		load.AudioContext = audio.NewContext(44100)
+		manager.PlayMusic("ping-pong")
+	}
 	ObjectsArr = manager.RoomsManager(0, screenWidth, screenHeight)
 	Background = rooms.DefaultBackground()
 	if err := ebiten.RunGame(game); err != nil {
@@ -57,10 +63,6 @@ func renderBackground(screen *ebiten.Image) {
 		screen.DrawImage(Background[0], op)
 		animated = 0
 	}
-
-	//op.GeoM.Scale(ObjectsArr[i].Scale, ObjectsArr[i].Scale)
-	//op.GeoM.Translate(ObjectsArr[i].X, ObjectsArr[i].Y)
-
 }
 
 func renderObjects(screen *ebiten.Image) { //renders all of the objects in a room
