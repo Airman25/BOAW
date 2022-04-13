@@ -10,6 +10,8 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/audio"
 )
 
+var Animated = 0
+
 //redirect you to the room you need
 func RoomsManager(room, screenWidth, screenHeight int) []rooms.RoomObject {
 	switch room {
@@ -26,6 +28,7 @@ func RoomsManager(room, screenWidth, screenHeight int) []rooms.RoomObject {
 	case 5:
 		return rooms.GetRoom5(screenWidth, screenHeight) //just credits
 	case 6:
+		Animated = 1
 		return rooms.GetRoom6(screenWidth, screenHeight) //will be actual game at some point
 	default:
 		return nil

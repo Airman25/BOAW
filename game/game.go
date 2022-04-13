@@ -3,6 +3,7 @@ package game
 import (
 	"log"
 
+	"github.com/Airman25/BOAW/chapters"
 	"github.com/Airman25/BOAW/load"
 	"github.com/Airman25/BOAW/manager"
 	"github.com/Airman25/BOAW/rooms"
@@ -15,7 +16,6 @@ type Game struct{}
 var ObjectsArr []rooms.RoomObject
 var Background []*ebiten.Image
 var mouseReleased bool
-var animated = 0
 
 const screenWidth = 1280
 const screenHeight = 720
@@ -47,22 +47,19 @@ func (g *Game) Update() error { // Game's logical update. Update proceeds the ga
 
 func (g *Game) Draw(screen *ebiten.Image) { // Game's rendering.
 	//renderBackground(screen)
-	renderObjects(screen)
-	buttonsClickDetect()
+	if manager.Animated != 0 {
+		renderAnitmation(screen)
+	} else {
+		renderObjects(screen)
+		buttonsClickDetect()
+	}
+
 }
 
 //ToDo draw the actual background
 func renderBackground(screen *ebiten.Image) {
-	animated++
 	op := &ebiten.DrawImageOptions{}
-	if animated < 12 {
-		screen.DrawImage(Background[0], op)
-	} else if animated < 24 {
-		screen.DrawImage(Background[1], op)
-	} else {
-		screen.DrawImage(Background[0], op)
-		animated = 0
-	}
+	screen.DrawImage(Background[0], op)
 }
 
 func renderObjects(screen *ebiten.Image) { //renders all of the objects in a room
@@ -102,4 +99,21 @@ func buttonPressed(mx, my int) int {
 		}
 	}
 	return -1
+}
+
+var animation int
+var requipment []*ebiten.Image
+
+func renderAnitmation(screen *ebiten.Image) {
+	animation += load.GameSpeed
+	if manager.Animated == 1 {
+		if requipment == nil {
+			requipment = chapters.Requipment1()
+		}
+		chapters.ChapterIAnitmation(&animation, screen, requipment)
+	}
+	if animation == 0 {
+		manager.Animated = 0
+		requipment = nil
+	}
 }
