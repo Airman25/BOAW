@@ -103,6 +103,9 @@ var Difficulty int
 var MusicVolume int
 var GameSpeed = 1
 var GameSize = "1280x720"
+var GameLevel = 0
+var GameLocationX = 0
+var GameLocationY = 0
 
 func SizeChanger(screenSizeWidth, screenSizeHeight int) {
 	ebiten.SetWindowSize(screenSizeWidth, screenSizeHeight)

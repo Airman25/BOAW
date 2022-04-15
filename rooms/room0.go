@@ -18,12 +18,6 @@ type RoomObject struct {
 	Image    *ebiten.Image
 }
 
-type AnimatedObject struct {
-	X, Y   float64
-	Scale  float64
-	Images []*ebiten.Image
-}
-
 //start menu
 func GetRoom0(screenWidth, screenHeight int) []RoomObject {
 	return []RoomObject{
@@ -42,5 +36,5 @@ func GetRoom0(screenWidth, screenHeight int) []RoomObject {
 }
 
 func DefaultBackground() []*ebiten.Image {
-	return []*ebiten.Image{} //load.ImageEbiten("Back0"), load.ImageEbiten("Back1")
+	return nil //[]*ebiten.Image{} //load.ImageEbiten("Back0"), load.ImageEbiten("Back1")
 }

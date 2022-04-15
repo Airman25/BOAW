@@ -4,6 +4,7 @@ import (
 	"os"
 	"os/exec"
 
+	"github.com/Airman25/BOAW/levels"
 	"github.com/Airman25/BOAW/load"
 	"github.com/Airman25/BOAW/rooms"
 	"github.com/hajimehoshi/ebiten/v2"
@@ -144,4 +145,23 @@ func PlayMusic(filename string) {
 	audioPlayer = load.GetMusic(filename)
 	audioPlayer.SetVolume(float64(load.MusicVolume) / 100)
 	audioPlayer.Play()
+}
+
+func LocationManager() []levels.AnimatedObject {
+	if load.GameLevel == 0 {
+		if load.GameLocationX == 0 && load.GameLocationY == 0 {
+			return levels.Location0()
+		}
+
+	}
+	return nil
+}
+
+func Background() []*ebiten.Image {
+	if load.GameLevel == 0 {
+		if load.GameLocationX == 0 && load.GameLocationY == 0 {
+			return []*ebiten.Image{load.ImageEbiten(`\spoilers\` + "Location1")}
+		}
+	}
+	return nil
 }
