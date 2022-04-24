@@ -7,7 +7,7 @@ import (
 
 const screenWidth = 1280
 const screenHeight = 720
-const moveSpeed = 7
+const moveSpeed = 12
 
 func ChapterIAnitmation(animation *int, screen *ebiten.Image, images []*ebiten.Image) {
 	if *animation*moveSpeed-512 < screenWidth/2 { //"Chapter I" text flying from the border to center
@@ -40,7 +40,7 @@ func ChapterIAnitmation(animation *int, screen *ebiten.Image, images []*ebiten.I
 	}
 
 	//exit from animation + preporation for the next one
-	if *animation > 60*10 { //animation lasts 1*10/load.GameSpeed second
+	if *animation > 60*6 { //animation lasts 1*6/load.GameSpeed second
 		*animation = 0
 	}
 }

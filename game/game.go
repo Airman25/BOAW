@@ -1,9 +1,9 @@
 package game
 
 import (
-	"fmt"
 	"log"
 
+	"github.com/Airman25/BOAW/battle"
 	"github.com/Airman25/BOAW/chapters"
 	"github.com/Airman25/BOAW/levels"
 	"github.com/Airman25/BOAW/load"
@@ -18,6 +18,7 @@ type Game struct{}
 
 var objectsArr []rooms.RoomObject           //containts buttons and other immovable objects
 var objectsLevelArr []levels.AnimatedObject //containts only current level objects
+var objectsBattleArr []battle.BattleObject  //containts current battle objects
 var background []*ebiten.Image              //contains background images
 var mouseReleased bool
 
@@ -32,12 +33,14 @@ func Launch(screenSizeWidth, screenSizeHeight int, musicenabled bool) {
 	ebiten.SetWindowSize(screenSizeWidth, screenSizeHeight)
 	//To Do: add game icon
 	//ebiten.SetWindowIcon(iconimage)
-	manager.LangManager(201)
+	battle.Initialise()
+	load.LoadConfig()
+	manager.LangManager(501)
 	if musicenabled {
 		load.AudioContext = audio.NewContext(44100)
 		manager.PlayMusic("ping-pong")
 	}
-	objectsArr = manager.RoomsManager(0, screenWidth, screenHeight)
+	objectsArr = manager.RoomsManager(0)
 	background = rooms.DefaultBackground()
 	if err := ebiten.RunGame(game); err != nil {
 		log.Fatal(err)
@@ -49,6 +52,7 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 }
 
 const Speed = 7
+const walkanim = 8
 
 // Game's logical update. Update proceeds the game state. Update is called every tick (1/60 [s] by default).
 func (g *Game) Update() error {
@@ -56,49 +60,76 @@ func (g *Game) Update() error {
 		for _, key := range inpututil.PressedKeys() {
 			if key == ebiten.KeyRight || key == ebiten.KeyD { //moving player right
 				levels.Player.X += Speed
-				levels.Player.ImageInUse = 0
+				walk(0)
 				collisionCheck(0)
 			} else if key == ebiten.KeyLeft || key == ebiten.KeyA { //moving player left
 				levels.Player.X -= Speed
-				levels.Player.ImageInUse = 1
+				walk(1)
 				collisionCheck(1)
 			} else if key == ebiten.KeyUp || key == ebiten.KeyW { //moving player up
 				levels.Player.Y -= Speed
-				levels.Player.ImageInUse = 2
+				walk(2)
 				collisionCheck(2)
 			} else if key == ebiten.KeyDown || key == ebiten.KeyS { //moving player down
 				levels.Player.Y += Speed
-				levels.Player.ImageInUse = 3
+				walk(3)
 				collisionCheck(3)
 			} else if key == ebiten.KeySpace { //interacting with enemies/chests (later)
 				enemy := collisionCheck(4)
-				fmt.Print(enemy)
+				if enemy > 0 {
+					broadcastBattle(enemy)
+				}
+			}
+		}
+		if len(inpututil.PressedKeys()) == 0 {
+			if levels.Player.ImageInUse > 3 {
+				levels.Player.ImageInUse -= 4
 			}
 		}
 		if levels.Player.X >= screenWidth {
 			levels.Player.X = -playerWidth
 			load.GameLocationX++
-			objectsLevelArr = manager.LocationManager()
-			background = manager.Background()
+			objectsLevelArr, background = manager.LocationManager()
 		} else if levels.Player.X < -playerWidth {
 			levels.Player.X = screenWidth
 			load.GameLocationX--
-			objectsLevelArr = manager.LocationManager()
-			background = manager.Background()
+			objectsLevelArr, background = manager.LocationManager()
 		} else if levels.Player.Y >= screenHeight-128 {
 			levels.Player.Y = -playerHeight
 			load.GameLocationY--
-			objectsLevelArr = manager.LocationManager()
-			background = manager.Background()
+			objectsLevelArr, background = manager.LocationManager()
 		} else if levels.Player.Y < -playerHeight {
 			levels.Player.Y = screenHeight - 128
 			load.GameLocationY++
-			objectsLevelArr = manager.LocationManager()
-			background = manager.Background()
+			objectsLevelArr, background = manager.LocationManager()
 		}
-
+	}
+	if battle.Skill != 0 {
+		if battle.Skill > 0 {
+			battle.HeroSkills(objectsBattleArr)
+		} else {
+			battle.EnemySkills(objectsBattleArr)
+		}
+	}
+	if battle.Win > 0 {
+		battle.Win = 0
+		battle.Reward()
+		objectsArr = manager.RoomsManager(6)
+		objectsBattleArr = nil
+		objectsLevelArr, background = manager.LocationManager()
 	}
 	return nil
+}
+
+func walk(x int) {
+	animation += load.GameSpeed
+	if animation < walkanim {
+		levels.Player.ImageInUse = x
+	} else if animation < walkanim*2 {
+		levels.Player.ImageInUse = x + 4
+	} else {
+		animation = 0
+	}
 }
 
 //Game's rendering.
@@ -109,10 +140,12 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	} else {
 		renderBackground(screen)
 		renderGame(screen)
-		renderObjects(screen)
+		renderBattle(screen)
+		if battle.Skill == 0 {
+			renderObjects(screen)
+		}
 		buttonsClickDetect()
 	}
-
 }
 
 //ToDo draw normal background
@@ -140,9 +173,11 @@ func buttonsClickDetect() {
 		mouseReleased = false
 		changeroom := manager.ButtonFunction(buttonPressed(mx, my))
 		if changeroom > -1 {
-			objectsArr = manager.RoomsManager(changeroom, screenWidth, screenHeight)
+			objectsArr = manager.RoomsManager(changeroom)
 			objectsLevelArr = nil
-			background = nil
+			if changeroom < 7 {
+				background = nil
+			}
 		}
 	} else if !ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
 		mouseReleased = true
@@ -178,8 +213,7 @@ func renderAnitmation(screen *ebiten.Image) {
 	if animation == 0 {
 		manager.Animated = 0
 		requipment = nil
-		objectsLevelArr = manager.LocationManager()
-		background = manager.Background()
+		objectsLevelArr, background = manager.LocationManager()
 	}
 }
 
@@ -225,4 +259,25 @@ func collisionCheck(mode int) int {
 		}
 	}
 	return 0
+}
+
+func broadcastBattle(index int) {
+	objectsLevelArr = nil                                               //erase current level data
+	objectsArr = manager.RoomsManager(7)                                //add buttons in battle
+	background = manager.Background(index)                              //change background
+	objectsBattleArr = append(manager.Heroes(), battle.Index(index)...) //add heroes and enemies
+}
+
+func renderBattle(screen *ebiten.Image) {
+	if objectsBattleArr != nil {
+		for i := 0; i < len(objectsBattleArr); i++ {
+			if objectsBattleArr[i].Health > 0 {
+				op := &ebiten.DrawImageOptions{}
+				op.GeoM.Scale(objectsBattleArr[i].Scale, objectsBattleArr[i].Scale)
+				op.GeoM.Rotate(objectsBattleArr[i].Rotation)
+				op.GeoM.Translate(objectsBattleArr[i].X, objectsBattleArr[i].Y)
+				screen.DrawImage(objectsBattleArr[i].Images[objectsBattleArr[i].ImageInUse], op)
+			}
+		}
+	}
 }

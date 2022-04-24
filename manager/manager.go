@@ -4,6 +4,7 @@ import (
 	"os"
 	"os/exec"
 
+	"github.com/Airman25/BOAW/battle"
 	"github.com/Airman25/BOAW/levels"
 	"github.com/Airman25/BOAW/load"
 	"github.com/Airman25/BOAW/rooms"
@@ -14,23 +15,33 @@ import (
 var Animated = 0
 
 //redirect you to the room you need
-func RoomsManager(room, screenWidth, screenHeight int) []rooms.RoomObject {
+func RoomsManager(room int) []rooms.RoomObject {
 	switch room {
 	case 0:
-		return rooms.GetRoom0(screenWidth, screenHeight) //start menu
+		return rooms.GetRoom0() //start menu
 	case 1:
-		return rooms.GetRoom1(screenWidth, screenHeight) //pre-game
+		return rooms.GetRoom1() //pre-game
 	case 2:
-		return rooms.GetRoom2(screenWidth, screenHeight) //will be file load menu
+		return rooms.GetRoom2() //will be file load menu
 	case 3:
-		return rooms.GetRoom3(screenWidth, screenHeight) //settings
+		return rooms.GetRoom3() //settings
 	case 4:
-		return rooms.GetRoom4(screenWidth, screenHeight) //achievements or medals or something else
+		return rooms.GetRoom4() //achievements or medals or something else
 	case 5:
-		return rooms.GetRoom5(screenWidth, screenHeight) //just credits
+		return rooms.GetRoom5() //just credits
 	case 6:
-		Animated = 1
-		return rooms.GetRoom6(screenWidth, screenHeight) //will be actual game at some point
+		anim()
+		return rooms.GetRoom6() //will be actual game at some point
+	case 7:
+		return rooms.GetRoom7() //inside of a battle
+	case 201:
+		return rooms.Strategy()
+	case 202:
+		return rooms.Skills()
+	case 203:
+		return rooms.Summon()
+	case 204:
+		return rooms.Items()
 	default:
 		return nil
 	}
@@ -38,7 +49,7 @@ func RoomsManager(room, screenWidth, screenHeight int) []rooms.RoomObject {
 
 //Reads file from src/lang
 func LangManager(lang int) {
-	if lang == 201 {
+	if lang == 501 {
 		load.LoadLang("en_us.lang")
 	} else {
 		load.LoadLang("ru_ru.lang")
@@ -48,7 +59,7 @@ func LangManager(lang int) {
 
 //in most cases change game "room" to the one requested by the button
 func ButtonFunction(function int) int {
-	if function > 200 {
+	if function > 500 {
 		LangManager(function)
 		return 3
 	}
@@ -96,10 +107,8 @@ func ButtonFunction(function int) int {
 
 		return -1
 	case 110:
-
 		fh, fw := ebiten.ScreenSizeInFullscreen()
 		h, _ := ebiten.WindowSize()
-
 		switch h {
 		case 1024:
 			load.SizeChanger(1152, 648)
@@ -119,6 +128,9 @@ func ButtonFunction(function int) int {
 			load.SizeChanger(1024, 648)
 		}
 		return 3
+	case 200: //basic attack
+		battle.Skill = 1
+		return -1
 	}
 	return function
 }
@@ -147,21 +159,37 @@ func PlayMusic(filename string) {
 	audioPlayer.Play()
 }
 
-func LocationManager() []levels.AnimatedObject {
-	if load.GameLevel == 0 {
-		if load.GameLocationX == 0 && load.GameLocationY == 0 {
-			return levels.Location0()
-		}
-
+//background for battle
+func Background(index int) []*ebiten.Image {
+	switch index {
+	case 1:
+		return []*ebiten.Image{load.ImageEbiten(`\spoilers\` + "BattleLocation1")}
 	}
 	return nil
 }
 
-func Background() []*ebiten.Image {
+//heroes, currently 1, planned 3
+func Heroes() []battle.BattleObject {
+	return battle.Hero1()
+}
+
+//should chapter animation be launched
+func anim() {
 	if load.GameLevel == 0 {
-		if load.GameLocationX == 0 && load.GameLocationY == 0 {
-			return []*ebiten.Image{load.ImageEbiten(`\spoilers\` + "Location1")}
+		if load.GameLocationX == 0 {
+			Animated = 1
+			load.GameLocationX = 1
+			load.GameLocationY = 1
 		}
 	}
-	return nil
+}
+
+//manages locations for now
+func LocationManager() ([]levels.AnimatedObject, []*ebiten.Image) {
+	if load.GameLevel == 0 {
+		if load.GameLocationX == 1 && load.GameLocationY == 1 {
+			return levels.Location1(), []*ebiten.Image{load.ImageEbiten(`\spoilers\` + "Location1")}
+		}
+	}
+	return nil, nil
 }

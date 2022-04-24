@@ -99,6 +99,7 @@ func LoadLang(filename string) {
 	fin.Close()
 }
 
+var MusicEnabled bool
 var Difficulty int
 var MusicVolume int
 var GameSpeed = 1
@@ -131,4 +132,53 @@ func GetMusic(filename string) *audio.Player {
 		return nil
 	}
 	return audioPlay
+}
+
+//loads default config
+func LoadConfig() {
+	fin, err := os.Open(`saves\config.cfg`)
+	if err != nil {
+		panic(err)
+	}
+	scanner := bufio.NewScanner(fin)
+	s := next(scanner)
+	if s == 1 {
+		MusicEnabled = true
+	}
+	s = next(scanner)
+	MusicVolume = s
+	s = next(scanner)
+	GameSpeed = s
+	s = next(scanner)
+	fh, fw := ebiten.ScreenSizeInFullscreen()
+	switch s {
+	case 0:
+		SizeChanger(1024, 648)
+	case 1:
+		SizeChanger(1152, 648)
+	case 2:
+		SizeChanger(1280, 720)
+	case 3:
+		SizeChanger(1366, 768)
+	case 4:
+		SizeChanger(1600, 900)
+	case 5:
+		SizeChanger(1920, 1080)
+	case 6:
+		SizeChanger(fh, fw)
+		ebiten.SetFullscreen(true)
+	}
+	fin.Close()
+}
+
+func next(scanner *bufio.Scanner) int {
+	if scanner.Scan() {
+		s := scanner.Text()
+		a := strings.Split(s, "=")
+		if len(a) > 1 {
+			i, _ := strconv.Atoi(a[1])
+			return i
+		}
+	}
+	return 0
 }

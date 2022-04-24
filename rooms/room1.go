@@ -3,7 +3,7 @@ package rooms
 import "github.com/Airman25/BOAW/load"
 
 //before game
-func GetRoom1(screenWidth, screenHeight int) []RoomObject {
+func GetRoom1() []RoomObject {
 	difficulty := "difficultyEasy"
 	switch load.Difficulty { //stored in number difficulty to text
 	case 1:
