@@ -28,7 +28,7 @@ const screenHeight = 720
 const playerWidth = 64
 const playerHeight = 128
 
-func Launch(screenSizeWidth, screenSizeHeight int, musicenabled bool) {
+func Launch(screenSizeWidth, screenSizeHeight int) {
 	game := &Game{}
 	ebiten.SetWindowSize(screenSizeWidth, screenSizeHeight)
 	//To Do: add game icon
@@ -36,7 +36,7 @@ func Launch(screenSizeWidth, screenSizeHeight int, musicenabled bool) {
 	battle.Initialise()
 	load.LoadConfig()
 	manager.LangManager(501)
-	if musicenabled {
+	if load.MusicEnabled {
 		load.AudioContext = audio.NewContext(44100)
 		manager.PlayMusic("ping-pong")
 	}
@@ -112,8 +112,15 @@ func (g *Game) Update() error {
 		}
 	}
 	if battle.Win > 0 {
-		battle.Win = 0
+		if battle.Win == 404 { //means player lost... or player is lost...
+			battle.Win = 0
+			objectsBattleArr = nil
+			objectsArr = manager.RoomsManager(0)
+			return nil
+		}
 		battle.Reward()
+		levels.DefeatedEnemies[battle.Win-1] = 1
+		battle.Win = 0
 		objectsArr = manager.RoomsManager(6)
 		objectsBattleArr = nil
 		objectsLevelArr, background = manager.LocationManager()
@@ -121,6 +128,7 @@ func (g *Game) Update() error {
 	return nil
 }
 
+//changes texture of player
 func walk(x int) {
 	animation += load.GameSpeed
 	if animation < walkanim {
@@ -134,7 +142,6 @@ func walk(x int) {
 
 //Game's rendering.
 func (g *Game) Draw(screen *ebiten.Image) {
-
 	if manager.Animated != 0 {
 		renderAnitmation(screen)
 	} else {
@@ -156,7 +163,8 @@ func renderBackground(screen *ebiten.Image) {
 	}
 }
 
-func renderObjects(screen *ebiten.Image) { //renders all of the objects in a room
+//renders all of the objects in a room
+func renderObjects(screen *ebiten.Image) {
 	for i := 0; i < len(objectsArr); i++ {
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Scale(objectsArr[i].Scale, objectsArr[i].Scale)
@@ -210,7 +218,7 @@ func renderAnitmation(screen *ebiten.Image) {
 		}
 		chapters.ChapterIAnitmation(&animation, screen, requipment)
 	}
-	if animation == 0 {
+	if animation == 0 || manager.Animated == -1 {
 		manager.Animated = 0
 		requipment = nil
 		objectsLevelArr, background = manager.LocationManager()

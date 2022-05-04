@@ -20,6 +20,8 @@ func Index(index int) []BattleObject {
 	switch index {
 	case 1:
 		return enemys("grasshopper", "", "")
+	case 2:
+		return enemys("grasshopper", "grasshopper", "")
 	}
 	return nil
 }

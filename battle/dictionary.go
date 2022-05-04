@@ -17,7 +17,7 @@ type enemy struct {
 var dict = make(map[string]*enemy)
 
 func Initialise() {
-	addenemy("grasshopper", 40, 10, []int{0})
+	addenemy("grasshopper", 20, 10, []int{0})
 	addenemy("rhinoceros_beetle", 0, 0, []int{0})
 	addenemy("spider", 0, 0, []int{0})
 	addenemy("bee", 0, 0, []int{0})
@@ -30,20 +30,12 @@ func addenemy(name string, hp int, damage int, skills []int) {
 
 //enemies placement in battle
 func enemys(enemy1 string, enemy2 string, enemy3 string) []BattleObject {
+	enemy := []BattleObject{{screenWidth/2 + screenWidth/4, screenHeight / 2, 2, 0, enemy1, dict[enemy1].MaxHP, 0, []*ebiten.Image{load.ImageEbiten(`\spoilers\` + enemy1)}}}
 	if enemy2 != "" {
+		enemy = append(enemy, BattleObject{screenWidth/2 + screenWidth/4, screenHeight/2 - screenHeight/4, 2, 0, enemy2, dict[enemy2].MaxHP, 0, []*ebiten.Image{load.ImageEbiten(`\spoilers\` + enemy2)}})
 		if enemy3 != "" {
-			return []BattleObject{
-				{screenWidth/2 + screenWidth/4, screenHeight / 2, 2, 0, enemy1, dict[enemy1].MaxHP, 0, []*ebiten.Image{load.ImageEbiten(`\spoilers\` + enemy1)}},
-				{screenWidth/2 + screenWidth/4, screenHeight/2 - screenHeight/4, 2, 0, enemy2, dict[enemy2].MaxHP, 0, []*ebiten.Image{load.ImageEbiten(`\spoilers\` + enemy2)}},
-				{screenWidth/2 + screenWidth/4, screenHeight/2 + screenHeight/4, 2, 0, enemy3, dict[enemy3].MaxHP, 0, []*ebiten.Image{load.ImageEbiten(`\spoilers\` + enemy3)}},
-			}
-		}
-		return []BattleObject{
-			{screenWidth/2 + screenWidth/4, screenHeight / 2, 2, 0, enemy1, dict[enemy1].MaxHP, 0, []*ebiten.Image{load.ImageEbiten(`\spoilers\` + enemy1)}},
-			{screenWidth/2 + screenWidth/4, screenHeight/2 - screenHeight/4, 2, 0, enemy2, dict[enemy2].MaxHP, 0, []*ebiten.Image{load.ImageEbiten(`\spoilers\` + enemy2)}},
+			enemy = append(enemy, BattleObject{screenWidth/2 + screenWidth/4, screenHeight/2 + screenHeight/4, 2, 0, enemy3, dict[enemy3].MaxHP, 0, []*ebiten.Image{load.ImageEbiten(`\spoilers\` + enemy3)}})
 		}
 	}
-	return []BattleObject{
-		{screenWidth/2 + screenWidth/4, screenHeight / 2, 2, 0, enemy1, dict[enemy1].MaxHP, 0, []*ebiten.Image{load.ImageEbiten(`\spoilers\` + enemy1)}},
-	}
+	return enemy
 }

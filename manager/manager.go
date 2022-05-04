@@ -1,8 +1,11 @@
 package manager
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
+	"reflect"
+	"strconv"
 
 	"github.com/Airman25/BOAW/battle"
 	"github.com/Airman25/BOAW/levels"
@@ -13,6 +16,7 @@ import (
 )
 
 var Animated = 0
+var SkillAwait int
 
 //redirect you to the room you need
 func RoomsManager(room int) []rooms.RoomObject {
@@ -42,6 +46,8 @@ func RoomsManager(room int) []rooms.RoomObject {
 		return rooms.Summon()
 	case 204:
 		return rooms.Items()
+	case 205:
+		return rooms.Target()
 	default:
 		return nil
 	}
@@ -54,7 +60,6 @@ func LangManager(lang int) {
 	} else {
 		load.LoadLang("ru_ru.lang")
 	}
-
 }
 
 //in most cases change game "room" to the one requested by the button
@@ -62,6 +67,10 @@ func ButtonFunction(function int) int {
 	if function > 500 {
 		LangManager(function)
 		return 3
+	} else if function > 400 && function < 404 {
+		battle.Skill = SkillAwait
+		battle.Target = function % 10
+		return 7
 	}
 	switch function {
 	case 100:
@@ -129,8 +138,8 @@ func ButtonFunction(function int) int {
 		}
 		return 3
 	case 200: //basic attack
-		battle.Skill = 1
-		return -1
+		SkillAwait = 1
+		return 205
 	}
 	return function
 }
@@ -161,8 +170,7 @@ func PlayMusic(filename string) {
 
 //background for battle
 func Background(index int) []*ebiten.Image {
-	switch index {
-	case 1:
+	if index < 10 {
 		return []*ebiten.Image{load.ImageEbiten(`\spoilers\` + "BattleLocation1")}
 	}
 	return nil
@@ -175,21 +183,50 @@ func Heroes() []battle.BattleObject {
 
 //should chapter animation be launched
 func anim() {
-	if load.GameLevel == 0 {
-		if load.GameLocationX == 0 {
-			Animated = 1
-			load.GameLocationX = 1
-			load.GameLocationY = 1
+	if load.GameLocationX%10 == 0 { //first room in each chapter
+		if load.GameLevel == 0 { //pre-story not finished yet
+			load.GameLevel = 1
 		}
+		if load.GameLevel == 1 {
+			Animated = 1
+			load.GameLocationX = 11
+			load.GameLocationY = 11
+			levels.Player.X = 200
+			levels.Player.Y = 200
+		}
+	} else {
+		Animated = -1
 	}
 }
 
-//manages locations for now
+//calls appropriative location based on the room player is in
 func LocationManager() ([]levels.AnimatedObject, []*ebiten.Image) {
-	if load.GameLevel == 0 {
-		if load.GameLocationX == 1 && load.GameLocationY == 1 {
-			return levels.Location1(), []*ebiten.Image{load.ImageEbiten(`\spoilers\` + "Location1")}
-		}
+	L := &levels.Location{}
+	fmt.Println("LocationX" + strconv.Itoa(load.GameLocationX) + "Y" + strconv.Itoa(load.GameLocationY))
+	locationData, err := namedFunction(L, "LocationX"+strconv.Itoa(load.GameLocationX)+"Y"+strconv.Itoa(load.GameLocationY))
+	if err != nil {
+		return nil, nil
 	}
-	return nil, nil
+	location, _ := (locationData[0]).Interface().([]levels.AnimatedObject)
+	return location, []*ebiten.Image{load.ImageEbiten(`\spoilers\` + "Location1")}
+}
+
+func namedFunction(class interface{}, funcName string, params ...interface{}) (data []reflect.Value, err error) {
+	//get value of named function in class
+	method := reflect.ValueOf(class).MethodByName(funcName)
+	//checks if method exist
+	if !method.IsValid() {
+		return nil, fmt.Errorf("Method not found \"%s\"", funcName)
+	}
+	/*
+		//in case I would ever need to also send data to func
+		sendData := make([]reflect.Value, len(params))
+		for i, param := range params {
+			sendData[i] = reflect.ValueOf(param)
+		}
+		out = m.Call(in)
+	*/
+	//gets the data from function
+	data = method.Call(nil)
+	return
 }

@@ -3,7 +3,7 @@ package battle
 var playerWin int
 var Win int
 
-//calss all existing enemies
+//calls for all existing enemies
 func EnemySkills(everyone []BattleObject) {
 	if len(everyone) > -Skill {
 		if everyone[-Skill].Health > 0 { // Skip enemies with no HP left
@@ -13,11 +13,17 @@ func EnemySkills(everyone []BattleObject) {
 			Skill--
 		}
 	} else {
-		if -Skill-1 == playerWin {
-			Win = -Win
+		if everyone[0].Health > 0 {
+			if -Skill-1 == playerWin {
+				Win = -Win
+			}
+			playerWin = 0
+			Skill = 0
+		} else {
+			Win = 404
+			playerWin = 0
+			Skill = 0
 		}
-		playerWin = 0
-		Skill = 0
 	}
 }
 
