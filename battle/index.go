@@ -14,6 +14,8 @@ type BattleObject struct {
 	Images     []*ebiten.Image
 }
 
+var BattleParticipans []BattleObject
+
 //data about which enemies exist in battle
 func Index(index int) []BattleObject {
 	Win = -index

@@ -13,8 +13,9 @@ func Hero1() []BattleObject {
 }
 
 //calls specific hero's skill
-func HeroSkills(everyone []BattleObject) {
+func HeroSkills() {
+	startY = screenHeight / 2
 	if Skill == 1 {
-		basicAttack(everyone)
+		basicAttack()
 	}
 }

@@ -18,7 +18,6 @@ type Game struct{}
 
 var objectsArr []rooms.RoomObject           //containts buttons and other immovable objects
 var objectsLevelArr []levels.AnimatedObject //containts only current level objects
-var objectsBattleArr []battle.BattleObject  //containts current battle objects
 var background []*ebiten.Image              //contains background images
 var mouseReleased bool
 
@@ -106,15 +105,15 @@ func (g *Game) Update() error {
 	}
 	if battle.Skill != 0 {
 		if battle.Skill > 0 {
-			battle.HeroSkills(objectsBattleArr)
+			battle.HeroSkills()
 		} else {
-			battle.EnemySkills(objectsBattleArr)
+			battle.EnemySkills()
 		}
 	}
 	if battle.Win > 0 {
+		battle.BattleParticipans = nil
 		if battle.Win == 404 { //means player lost... or player is lost...
 			battle.Win = 0
-			objectsBattleArr = nil
 			objectsArr = manager.RoomsManager(0)
 			return nil
 		}
@@ -122,7 +121,6 @@ func (g *Game) Update() error {
 		levels.DefeatedEnemies[battle.Win-1] = 1
 		battle.Win = 0
 		objectsArr = manager.RoomsManager(6)
-		objectsBattleArr = nil
 		objectsLevelArr, background = manager.LocationManager()
 	}
 	return nil
@@ -270,21 +268,21 @@ func collisionCheck(mode int) int {
 }
 
 func broadcastBattle(index int) {
-	objectsLevelArr = nil                                               //erase current level data
-	objectsArr = manager.RoomsManager(7)                                //add buttons in battle
-	background = manager.Background(index)                              //change background
-	objectsBattleArr = append(manager.Heroes(), battle.Index(index)...) //add heroes and enemies
+	objectsLevelArr = nil                                                       //erase current level data
+	objectsArr = manager.RoomsManager(7)                                        //add buttons in battle
+	background = manager.Background(index)                                      //change background
+	battle.BattleParticipans = append(manager.Heroes(), battle.Index(index)...) //add heroes and enemies
 }
 
 func renderBattle(screen *ebiten.Image) {
-	if objectsBattleArr != nil {
-		for i := 0; i < len(objectsBattleArr); i++ {
-			if objectsBattleArr[i].Health > 0 {
+	if battle.BattleParticipans != nil {
+		for i := 0; i < len(battle.BattleParticipans); i++ {
+			if battle.BattleParticipans[i].Health > 0 {
 				op := &ebiten.DrawImageOptions{}
-				op.GeoM.Scale(objectsBattleArr[i].Scale, objectsBattleArr[i].Scale)
-				op.GeoM.Rotate(objectsBattleArr[i].Rotation)
-				op.GeoM.Translate(objectsBattleArr[i].X, objectsBattleArr[i].Y)
-				screen.DrawImage(objectsBattleArr[i].Images[objectsBattleArr[i].ImageInUse], op)
+				op.GeoM.Scale(battle.BattleParticipans[i].Scale, battle.BattleParticipans[i].Scale)
+				op.GeoM.Rotate(battle.BattleParticipans[i].Rotation)
+				op.GeoM.Translate(battle.BattleParticipans[i].X, battle.BattleParticipans[i].Y)
+				screen.DrawImage(battle.BattleParticipans[i].Images[battle.BattleParticipans[i].ImageInUse], op)
 			}
 		}
 	}

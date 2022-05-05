@@ -1,6 +1,7 @@
 package rooms
 
 import (
+	"github.com/Airman25/BOAW/battle"
 	"github.com/Airman25/BOAW/load"
 )
 
@@ -47,11 +48,15 @@ func Items() []RoomObject { //405-499
 }
 
 func Target() []RoomObject {
-	return []RoomObject{
-		{screenWidth/2 - buttonwidth, screenHeight / 2, buttonwidth, buttonheight, buttonscaling, 7, load.ImageText("button", load.Localisation["buttonCancel"], buttonwidth, buttonheight, "", 0, 0)},
-
-		{screenWidth/2 + screenWidth/4, screenHeight / 2, buttonwidth, buttonheight, buttonscaling, 401, load.ImageEbiten(`\spoilers\` + "mark_1")},
-		{screenWidth/2 + screenWidth/4, screenHeight/2 - screenHeight/4, buttonwidth, buttonheight, buttonscaling, 402, load.ImageEbiten(`\spoilers\` + "mark_1")},
-		{screenWidth/2 + screenWidth/4, screenHeight/2 + screenHeight/4, buttonwidth, buttonheight, buttonscaling, 403, load.ImageEbiten(`\spoilers\` + "mark_1")},
+	var Targets = []RoomObject{{screenWidth/2 - buttonwidth, screenHeight / 2, buttonwidth, buttonheight, buttonscaling, 7, load.ImageText("button", load.Localisation["buttonCancel"], buttonwidth, buttonheight, "", 0, 0)}}
+	if battle.Alive(1) {
+		Targets = append(Targets, RoomObject{screenWidth/2 + screenWidth/4, screenHeight / 2, buttonwidth, buttonheight, buttonscaling, 401, load.ImageEbiten(`\spoilers\` + "mark_1")})
 	}
+	if battle.Alive(2) {
+		Targets = append(Targets, RoomObject{screenWidth/2 + screenWidth/4, screenHeight/2 - screenHeight/4, buttonwidth, buttonheight, buttonscaling, 402, load.ImageEbiten(`\spoilers\` + "mark_1")})
+	}
+	if battle.Alive(3) {
+		Targets = append(Targets, RoomObject{screenWidth/2 + screenWidth/4, screenHeight/2 + screenHeight/4, buttonwidth, buttonheight, buttonscaling, 403, load.ImageEbiten(`\spoilers\` + "mark_1")})
+	}
+	return Targets
 }
