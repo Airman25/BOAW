@@ -10,6 +10,7 @@ type BattleObject struct {
 	Rotation   float64
 	Name       string
 	Health     int
+	Defense    float64
 	ImageInUse int
 	Images     []*ebiten.Image
 }
@@ -24,6 +25,10 @@ func Index(index int) []BattleObject {
 		return enemys("grasshopper", "", "")
 	case 2:
 		return enemys("grasshopper", "grasshopper", "")
+	case 3:
+		return enemys("rhinoceros_beetle", "rhinoceros_beetle", "")
+	case 4:
+		return enemys("grasshopper", "rhinoceros_beetle", "")
 	}
 	return nil
 }

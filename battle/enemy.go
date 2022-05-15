@@ -6,6 +6,7 @@ var Win int
 //calls for all existing enemies
 func EnemySkills() {
 	if -Skill < 4 {
+		Target = 0
 		if Alive(-Skill) {
 			enemySkill()
 		} else {
@@ -20,6 +21,9 @@ func EnemySkills() {
 		} else {
 			Win = 404
 		}
+		for i := 0; i < len(BattleParticipans); i++ {
+			BattleParticipans[0].Defense = 0
+		}
 		playerKillCount = 0
 		Skill = 0
 	}
@@ -27,8 +31,11 @@ func EnemySkills() {
 
 //calls specific enemy skill
 func enemySkill() {
-	if dict[BattleParticipans[-Skill].Name].Skills[0] == 0 {
+	switch Dict[BattleParticipans[-Skill].Name].Skill {
+	case 0:
 		grasshopperJump()
+	case 1:
+		beetleDash()
 	}
 }
 

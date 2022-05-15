@@ -140,6 +140,16 @@ func ButtonFunction(function int) int {
 	case 200: //basic attack
 		SkillAwait = 1
 		return 205
+	case 205: //block
+		battle.Skill = 2
+		return 7
+	case 206: //change turn... but we only have 1 hero currently...
+		return 7
+	case 207: //run from battle
+		battle.BattleParticipans = nil
+		return 6
+	case 208: //capture-delayed for...
+		return 7
 	}
 	return function
 }
